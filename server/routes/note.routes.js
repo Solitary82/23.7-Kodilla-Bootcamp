@@ -6,10 +6,11 @@ const router = new Router();
 // Add a new Note
 router.route('/notes').post(NoteController.addNote);
 
-// Delete a note by noteId
+// End pointy z zadania
+// Delete a single note
 router.route('/notes/:noteId').delete(NoteController.deleteNote);
 
-// Modify a note task by laneId
-router.route('/notes/:noteId').put(NoteController.updateNote);
+// Edit a note content by noteId
+router.route('/notes').put(NoteController.editNoteContent);
 
 export default router;

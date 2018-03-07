@@ -1,12 +1,11 @@
 import React, { Component, PropTypes } from 'react';
-
 import styles from './Edit.css';
 
 export default class Edit extends Component {
   checkEnter = (e) => {
     if(e.key === 'Enter') {
-        this.finishEdit(e);
-      }
+      this.finishEdit(e);
+    }
   };
 
   finishEdit = (e) => {
@@ -23,7 +22,7 @@ export default class Edit extends Component {
 
   renderValue = () => {
     const { value, onDelete, onValueClick } = this.props;
-  
+
     return (
       <div>
         <span className={styles.value} onClick={onValueClick}>{value}</span>
@@ -34,23 +33,23 @@ export default class Edit extends Component {
 
   renderEdit = () => {
     return (
-        <input
-          type="text"
-          autoFocus
-          defaultValue={this.props.value}
-          onBlur={this.finishEdit}
-          onKeyPress={this.checkEnter}
-        />
-      );
+      <input
+        type="text"
+        autoFocus
+        defaultValue={this.props.value}
+        onBlur={this.finishEdit}
+        onKeyPress={this.checkEnter}
+      />
+    );
   };
 
   render() {
     return (
-        <div>
-          {this.props.editing ? this.renderEdit() : this.renderValue()}
-        </div>
-      );
-  }
+      <div>
+        {this.props.editing ? this.renderEdit() : this.renderValue()}
+      </div>
+    );
+    }
 }
 
 Edit.propTypes = {

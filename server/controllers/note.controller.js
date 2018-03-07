@@ -1,16 +1,12 @@
+import uuid from 'uuid';
 import Lane from '../models/lane';
 import Note from '../models/note';
-import uuid from 'uuid';
-
-export function getSomething(req, res) {
-  return res.status(200).end();
-}
 
 export function addNote(req, res) {
   const { note, laneId } = req.body;
 
   if (!note || !note.task || !laneId) {
-    return res.status(400).end();
+    res.status(400).end();
   }
 
   const newNote = new Note({
@@ -21,7 +17,7 @@ export function addNote(req, res) {
   newNote.save((err, saved) => {
     if (err) {
       res.status(500).send(err);
-    } else {
+    }
     Lane.findOne({ id: laneId })
       .then(lane => {
         lane.notes.push(saved);
@@ -29,38 +25,41 @@ export function addNote(req, res) {
       })
       .then(() => {
         res.json(saved);
-      })
-      .catch((arg) => {
-      	console.log(arg)
-      }) ;
-    }
+      });
   });
 }
 
 export function deleteNote(req, res) {
-  Note.findOneAndRemove({ id: req.params.noteId }).exec((err, note) => {
-    if (err) {
-      res.status(500).send(err);
-    }
-    Lane.findOne({ notes: { $in: [note._id] } })
-    .then(lane => {
-      lane.notes.remove(note._id);
-      lane.save();
-    })
-    .then(() => {
-      res.status(200).end();
-    });
-  });
-}
+  Note.findOne({id: req.params.noteId}).exec((err, note) => {
+      if(err) {
+        res.status(500).send(err);
+      }
 
-export function updateNote(req, res) {
-  if (!req.body.task) {
-    res.status(403).end();
+      if(note) {
+        Lane.findOne({notes: note._id}).exec( (err, lane) => {
+          if(err) {
+            res.status(500).send(err);
+          }
+          lane.notes.pull(note);
+          lane.save();
+        });
+
+        res.status(200).send(note);
+      } else {
+        res.status(500).send(err);
+      }
+    })
   }
-  Note.findOneAndUpdate({ id: req.params.noteId }, { task: req.body.task }).exec((err) => {
-    if (err) {
-      res.status(500).send(err);
+
+export function editNoteContent(req, res) {
+  const note = req.body;
+    if(!note.id || !note.task) {
+      res.status(403).end();
     }
-    res.status(200).end();
-  });
+    Note.findOneAndUpdate({id: note.id}, note, {new: true}, (err, updated) => {
+      if(err) {
+        res.status(500).send('error 500');
+      }
+      res.json(updated);
+    })
 }

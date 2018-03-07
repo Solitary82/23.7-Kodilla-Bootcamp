@@ -1,10 +1,6 @@
 import Lane from '../models/lane';
-import Note from '../models/note';
 import uuid from 'uuid';
-
-export function getSomething(req, res) {
-  return res.status(200).end();
-}
+import Note from '../models/note'
 
 export function addLane(req, res) {
   if (!req.body.name) {
@@ -20,7 +16,7 @@ export function addLane(req, res) {
     if (err) {
       res.status(500).send(err);
     }
-    res.json(saved);
+    res.json( saved );
   });
 }
 
@@ -31,33 +27,35 @@ export function getLanes(req, res) {
     }
     res.json({ lanes });
   });
-}
+};
 
+// deleting lane with hook them delete notes from
+// this lane is in server/models/lane.js
+// czyli hak usuwa notatki z usuwanej właśnie linii
 export function deleteLane(req, res) {
-  Lane.findOneAndRemove({ id: req.params.laneId }).exec((err, lane) => {
+  console.log(req.params.laneId);
+  Lane.findOne({ id: req.params.laneId }).exec((err, lane) => {
     if (err) {
       res.status(500).send(err);
     }
 
-    lane.notes.forEach((noteId) => {
-      Note.findOneAndRemove({ _id: noteId }).exec((err) => {
-        if (err) {
-          res.status(500).send(err);
-        }
-        res.status(200).end();
-      })
-    })
+    lane.remove(() => {
+      res.status(200).end();
+    });
   });
 }
 
-export function updateLane(req, res) {
-  if (!req.body.name) {
-    res.status(403).end();
-  }
-  Lane.findOneAndUpdate({ id: req.params.laneId }, { name: req.body.name }).exec((err, oldName) => {
-    if (err) {
-      res.status(500).send(err);
-    }
-    res.json(oldName);
-  });
+export function editLaneName(req, res) {
+  const lane = req.body;
+   if(!lane.id ) {
+     res.status(403).end();
+   }
+   // new: boolean if true method return modified document rather than original document.
+   // lanes is updated and parsed with .json method.
+   Lane.findOneAndUpdate({id: lane.id}, lane, {new: true}, (err, updatedlane) => {
+     if(err) {
+       res.status(500).send(err);
+     }
+     res.json(updatedlane);
+   })
 }
